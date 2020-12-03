@@ -2,11 +2,16 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strconv"
 	"strings"
+)
+
+var (
+	flagPositional = flag.Bool("positional", false, "determine password validity by position of char rather than count")
 )
 
 type PassInfo struct {
@@ -16,6 +21,8 @@ type PassInfo struct {
 }
 
 func main() {
+	flag.Parse()
+
 	f, err := os.Open(os.Args[len(os.Args)-1])
 	if err != nil {
 		log.Fatalf("error opening input file: %v", err)
@@ -31,8 +38,14 @@ func main() {
 			log.Fatalf("error parsing input line: %v", err)
 		}
 		totalCount++
-		if pi.isValid() {
-			validCount++
+		if *flagPositional {
+			if pi.isValidByPosition() {
+				validCount++
+			}
+		} else {
+			if pi.isValidByCount() {
+				validCount++
+			}
 		}
 	}
 
@@ -64,7 +77,12 @@ func parsePassInfo(s string) (*PassInfo, error) {
 	}, nil
 }
 
-func (pi *PassInfo) isValid() bool {
+func (pi *PassInfo) isValidByCount() bool {
 	count := int64(strings.Count(pi.password, string(pi.char)))
 	return count >= pi.lBound && count <= pi.uBound
+}
+
+func (pi *PassInfo) isValidByPosition() bool {
+	passRunes := []rune(pi.password)
+	return (passRunes[pi.lBound-1] == pi.char) != (passRunes[pi.uBound-1] == pi.char)
 }
