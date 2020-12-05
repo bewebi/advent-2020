@@ -19,6 +19,9 @@ func main() {
 	defer f.Close()
 
 	maxID := 0
+	minID := math.MaxInt64
+	allSeats := map[int]bool{}
+
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		seatID, err := getSeatIDFromCode(s.Text())
@@ -28,9 +31,20 @@ func main() {
 		if seatID > maxID {
 			maxID = seatID
 		}
+		if seatID < minID {
+			minID = seatID
+		}
+		allSeats[seatID] = true
 	}
 
-	log.Printf("the highest seat ID is %d", maxID)
+	mySeat := -1
+	for i := minID; i < maxID; i++ {
+		if !allSeats[i] {
+			mySeat = i
+			break
+		}
+	}
+	log.Printf("the lowest seat ID is %d, the highest seat ID is %d, and the missing seat is %d", minID, maxID, mySeat)
 }
 
 func getSeatIDFromCode(c string) (int, error) {
