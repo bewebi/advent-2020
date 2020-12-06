@@ -6,7 +6,10 @@ import (
 	"os"
 )
 
-type groupAnswer map[rune]bool
+type groupAnswer struct {
+	answers map[rune]int
+	count   int
+}
 
 func main() {
 	f, err := os.Open(os.Args[len(os.Args)-1])
@@ -15,25 +18,36 @@ func main() {
 	}
 	defer f.Close()
 
-	ga := groupAnswer{}
+	ga := groupAnswer{map[rune]int{}, 0}
 	gas := []groupAnswer{}
 
 	s := bufio.NewScanner(f)
 	for s.Scan() {
 		if s.Text() == "" {
 			gas = append(gas, ga)
-			ga = groupAnswer{}
+			ga = groupAnswer{map[rune]int{}, 0}
 			continue
 		}
+		ga.count++
 		for _, r := range []rune(s.Text()) {
-			ga[r] = true
+			if _, ok := ga.answers[r]; ok {
+				ga.answers[r]++
+				continue
+			}
+			ga.answers[r] = 1
 		}
 	}
 	gas = append(gas, ga)
 
 	sum := 0
+	uSum := 0
 	for _, ga := range gas {
-		sum += len(ga)
+		sum += len(ga.answers)
+		for _, c := range ga.answers {
+			if c == ga.count {
+				uSum++
+			}
+		}
 	}
-	log.Printf("sum of group answers is %d", sum)
+	log.Printf("sum of group answers is %d and the sum of unanimous group answers is %d", sum, uSum)
 }
