@@ -49,7 +49,7 @@ func main() {
 		}
 	}
 	log.Printf("%d bags can hold %s bags", sum, *flagTargetColor)
-	tcBag, ok := allBags["shiny gold"]
+	tcBag, ok := allBags[*flagTargetColor]
 	if !ok {
 		log.Fatalf("no bag of color \"%s\" found", *flagTargetColor)
 	}
