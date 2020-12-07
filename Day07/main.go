@@ -47,6 +47,7 @@ func main() {
 		}
 	}
 	log.Printf("%d bags can hold shiny gold bags", sum)
+	log.Printf("shiny gold bags hold %d other bags", allBags["shiny gold"].countContents())
 }
 
 func (b *bag) holdsColor(c string) bool {
@@ -59,6 +60,17 @@ func (b *bag) holdsColor(c string) bool {
 		}
 	}
 	return false
+}
+
+func (b *bag) countContents() int64 {
+	var sum int64
+	for cBagColor, i := range b.contents {
+		sum += i
+		if cBag, ok := allBags[cBagColor]; ok {
+			sum += i * cBag.countContents()
+		}
+	}
+	return sum
 }
 
 func parseLineAsBag(l string) (*bag, error) {
