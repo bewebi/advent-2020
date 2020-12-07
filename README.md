@@ -18,7 +18,7 @@ $ ./Day01 input.txt
 2020/12/03 21:07:57 Inputs [933 1087] sum to 2020! Their product is 1014171
 ```
 
-This will log the answer for Part 1 in a user-friendly message. Each executable accepts a flag that will result in the answer for Part 2 of the day's problem.
+This will log the answer(s) in a user-friendly message. In cases where the default behavior does not output answers for both parts, the default behavior will output an answer for Part 1 and the user may specify a flag in order to get the answer for Part 2.
 
 For example for Day 1:
 
