@@ -3,11 +3,10 @@ package main
 import (
 	"bufio"
 	"flag"
-	"fmt"
 	"log"
 	"os"
+	"regexp"
 	"strconv"
-	"strings"
 )
 
 type bag struct {
@@ -15,13 +14,10 @@ type bag struct {
 	contents map[string]int64
 }
 
-const (
-	BAGSCONTAIN = " bags contain "
-	NOOTHERBAGS = "no other bags"
-	BAG         = " bag"
-)
-
 var (
+	lineRE    = regexp.MustCompile(`([a-z ]*) bags contain ([0-9a-z, ]*)\.`)
+	contentRE = regexp.MustCompile(`([0-9]*) ([a-z ]*) bag`)
+
 	allBags         map[string]*bag
 	flagTargetColor = flag.String("target-color", "shiny gold", "color of bag to print info for")
 )
@@ -85,22 +81,12 @@ func (b *bag) countContents() int64 {
 
 func parseLineAsBag(l string) (*bag, error) {
 	b := &bag{"", map[string]int64{}}
-	i := strings.Index(l, BAGSCONTAIN)
-	b.color = l[:i]
-	contentPart := l[i+len(BAGSCONTAIN) : len(l)-1]
-	for _, s := range strings.Split(contentPart, ", ") {
-		i := strings.Index(s, NOOTHERBAGS)
-		if i >= 0 {
-			continue
-		}
-		numPart := s[:1] // should generalize to allow for multi-digit numbers
-		num, err := strconv.ParseInt(numPart, 10, 64)
-		if err != nil {
-			return nil, fmt.Errorf("error parsing numPart %s as int: %v", numPart, err)
-		}
-		i = strings.Index(s, BAG)
-		colorPart := s[2:i]
-		b.contents[colorPart] = num
+	lMatch := lineRE.FindStringSubmatch(l) // format: [full, color, content]
+	b.color = lMatch[1]
+	contentPart := lMatch[2]
+	for _, cMatch := range contentRE.FindAllStringSubmatch(contentPart, -1) { // format: [full, num, color]
+		num, _ := strconv.ParseInt(cMatch[1], 10, 64) // can ignore error since we're guaranteed numeric input from regex match
+		b.contents[cMatch[2]] = num
 	}
 	return b, nil
 }
