@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -20,9 +21,14 @@ const (
 	BAG         = " bag"
 )
 
-var allBags map[string]*bag
+var (
+	allBags         map[string]*bag
+	flagTargetColor = flag.String("target-color", "shiny gold", "color of bag to print info for")
+)
 
 func main() {
+	flag.Parse()
+
 	f, err := os.Open(os.Args[len(os.Args)-1])
 	if err != nil {
 		log.Fatalf("error opening input file: %v", err)
@@ -42,12 +48,16 @@ func main() {
 
 	sum := 0
 	for _, b := range allBags {
-		if b.holdsColor("shiny gold") {
+		if b.holdsColor(*flagTargetColor) {
 			sum++
 		}
 	}
-	log.Printf("%d bags can hold shiny gold bags", sum)
-	log.Printf("shiny gold bags hold %d other bags", allBags["shiny gold"].countContents())
+	log.Printf("%d bags can hold %s bags", sum, *flagTargetColor)
+	tcBag, ok := allBags["shiny gold"]
+	if !ok {
+		log.Fatalf("no bag of color \"%s\" found", *flagTargetColor)
+	}
+	log.Printf("%s bags hold %d other bags", *flagTargetColor, tcBag.countContents())
 }
 
 func (b *bag) holdsColor(c string) bool {
