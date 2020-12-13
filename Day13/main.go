@@ -53,15 +53,13 @@ func main() {
 	}
 	log.Printf("next bus after %d is %d, arriving in %d minutes; id*wait: %d", start, busID, min, min*busID)
 
-	base := busIDs[0]
-	found := map[int64]bool{busIDs[0]: true}
-	attempt, prodFound := int64(0), int64(1)
+	found := map[int64]bool{}
+	prodFound := int64(1)
 	start = 0
 	success := false
 	for !success {
-		attempt += prodFound
 		success = true
-		start = base * attempt
+		start += prodFound
 		for i, id := range busIDs {
 			if id == -1 {
 				continue
