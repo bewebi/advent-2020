@@ -64,4 +64,4 @@ Usage of ./Day01:
     	find three input lines that sum to target rather than two
 ```
 
-If improperly formatted input is given the program will log a fatal error.
+For most days, if improperly formatted input is given the program will log a fatal error.
