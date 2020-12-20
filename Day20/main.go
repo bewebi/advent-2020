@@ -12,9 +12,15 @@ import (
 var (
 	tileRE = regexp.MustCompile(`^Tile ([0-9]+):$`)
 
-	tiles = map[int64][]string{}
+	tiles = map[int64]tile{}
 	edges = map[string][]int64{}
 )
+
+type tile struct {
+	top, right, bottom, left string
+	rotation                 int
+	rows                     []string
+}
 
 func main() {
 	flag.Parse()
@@ -30,35 +36,35 @@ func main() {
 	for s.Scan() {
 		match := tileRE.FindStringSubmatch(s.Text())
 		tileNum, _ := strconv.ParseInt(match[1], 10, 64)
-		tile := make([]string, 4)
+		t := tile{}
 
 		// top
 		s.Scan()
 		row := s.Text()
-		tile[0] = row
-		tile[1] = row[:1]
-		tile[3] = row[len(row)-1:]
+		t.top = row
+		t.left = row[:1]
+		t.right = row[len(row)-1:]
+		t.rows = []string{row}
 
 		for s.Scan() && s.Text() != "" {
 			row = s.Text()
-			tile[1] += row[:1]
-			tile[3] += row[len(row)-1:]
+			t.left = row[:1] + t.left
+			t.right += row[len(row)-1:]
+			t.rows = append(t.rows, row)
 		}
-		tile[2] = row
+		t.bottom = reverseString(row)
 
-		tiles[tileNum] = tile
-		for _, edge := range tile {
-			if ts, ok := edges[edge]; ok {
-				edges[edge] = append(ts, tileNum)
-			} else {
-				edges[edge] = []int64{tileNum}
-			}
-		}
+		tiles[tileNum] = t
+
+		addEdge(tileNum, t.top)
+		addEdge(tileNum, t.right)
+		addEdge(tileNum, t.left)
+		addEdge(tileNum, t.bottom)
 	}
 
 	corners := []int64{}
-	for num, tile := range tiles {
-		if matchedEdges(num, tile) == 2 {
+	for num, t := range tiles {
+		if matchedEdges(num, t) == 2 {
 			corners = append(corners, num)
 		}
 	}
@@ -69,24 +75,45 @@ func main() {
 	}
 }
 
-func matchedEdges(tNum int64, tile []string) int {
+func addEdge(tNum int64, edge string) {
+	if ts, ok := edges[edge]; ok {
+		edges[edge] = append(ts, tNum)
+	} else {
+		edges[edge] = []int64{tNum}
+	}
+}
+
+func matchEdge(tNum int64, edge string) bool {
+	if ts, ok := edges[edge]; ok {
+		for _, t := range ts {
+			if t != tNum {
+				return true
+			}
+		}
+	}
+	if ts, ok := edges[reverseString(edge)]; ok {
+		for _, t := range ts {
+			if t != tNum {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+func matchedEdges(tNum int64, t tile) int {
 	matched := 0
-	for _, edge := range tile {
-		if ts, ok := edges[edge]; ok {
-			found := false
-			for _, t := range ts {
-				if t != tNum {
-					matched++
-					break
-				}
-			}
-			if found {
-				continue
-			}
-		}
-		if _, ok := edges[reverseString(edge)]; ok {
-			matched++
-		}
+	if matchEdge(tNum, t.top) {
+		matched++
+	}
+	if matchEdge(tNum, t.right) {
+		matched++
+	}
+	if matchEdge(tNum, t.left) {
+		matched++
+	}
+	if matchEdge(tNum, t.bottom) {
+		matched++
 	}
 	return matched
 }
