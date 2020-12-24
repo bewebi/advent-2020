@@ -6,6 +6,7 @@ My [Advent of Code 2020](https://adventofcode.com/) solutions!
 ```
       --------Part 1---------   --------Part 2--------
 Day       Time    Rank  Score       Time   Rank  Score
+ 23   00:35:47    1334      0   23:01:17   9419      0
  22   00:09:34    1002      0   01:21:33   2358      0
  21   00:32:54    1242      0   00:43:19   1214      0
  20   00:38:17     794      0   13:03:43   3817      0
@@ -29,6 +30,7 @@ Day       Time    Rank  Score       Time   Rank  Score
   2       >24h   80997      0       >24h  78540      0
   1       >24h  101832      0       >24h  95449      0
 ```
+Every star except Day 23 Part 2 completed without outside help
 
 ## Usage
 
